@@ -1,0 +1,159 @@
+<?php
+// api/helpers.php — Shared utility functions
+
+// ── JSON responses ───────────────────────────────────────────
+function json_success(array $data = [], int $code = 200): never {
+    http_response_code($code);
+    echo json_encode(['success' => true, 'data' => $data]);
+    exit;
+}
+
+function json_error(string $message, int $code = 400): never {
+    http_response_code($code);
+    echo json_encode(['success' => false, 'error' => $message]);
+    exit;
+}
+
+// ── Minimal JWT ───────────────────────────────────────────────
+function generate_jwt(int $userId, string $email, string $role, int $ttl = 86400): string {
+    $header  = base64url_encode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
+    $payload = base64url_encode(json_encode([
+        'sub'   => $userId,
+        'email' => $email,
+        'role'  => $role,
+        'iat'   => time(),
+        'exp'   => time() + $ttl,
+    ]));
+    $sig = base64url_encode(hash_hmac('sha256', "$header.$payload", JWT_SECRET, true));
+    return "$header.$payload.$sig";
+}
+
+function verify_jwt(string $token): ?array {
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) return null;
+    [$header, $payload, $sig] = $parts;
+    $expected = base64url_encode(hash_hmac('sha256', "$header.$payload", JWT_SECRET, true));
+    if (!hash_equals($expected, $sig)) return null;
+    $data = json_decode(base64url_decode($payload), true);
+    if (!$data || $data['exp'] < time()) return null;
+    return $data;
+}
+
+function base64url_encode(string $data): string {
+    return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+}
+function base64url_decode(string $data): string {
+    return base64_decode(strtr($data, '-_', '+/') . str_repeat('=', (4 - strlen($data) % 4) % 4));
+}
+
+// ── Auth middleware ───────────────────────────────────────────
+function require_auth(): array {
+    $auth  = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    $token = str_replace('Bearer ', '', $auth);
+    $data  = verify_jwt($token);
+    if (!$data) json_error('Unauthorized. Please log in.', 401);
+
+    // Attach user plan from DB for gating
+    try {
+        $pdo  = get_db();
+        $stmt = $pdo->prepare('SELECT id, full_name, email, plan, role FROM users WHERE id = ? AND is_active = 1');
+        $stmt->execute([$data['sub']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$user) json_error('Account not found or deactivated.', 401);
+        return $user;
+    } catch (PDOException $e) {
+        log_error('require_auth', $e->getMessage());
+        json_error('Server error.', 500);
+    }
+}
+
+// ── Token encryption (AES-256-CBC) ───────────────────────────
+function encrypt_token(string $plaintext, string $keyHex): string {
+    $key  = hex2bin($keyHex);
+    $iv   = random_bytes(16);
+    $enc  = openssl_encrypt($plaintext, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+    return base64_encode($iv . $enc);
+}
+
+function decrypt_token(string $ciphertext, string $keyHex): string {
+    $key  = hex2bin($keyHex);
+    $raw  = base64_decode($ciphertext);
+    $iv   = substr($raw, 0, 16);
+    $enc  = substr($raw, 16);
+    return openssl_decrypt($enc, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+}
+
+// ── Logging ───────────────────────────────────────────────────
+function log_error(string $context, string $message): void {
+    if (!is_dir(LOG_PATH)) @mkdir(LOG_PATH, 0755, true);
+    $line = '[' . date('Y-m-d H:i:s') . "] [$context] $message\n";
+    file_put_contents(LOG_PATH . 'error.log', $line, FILE_APPEND);
+}
+
+function log_raw(string $context, string $data): void {
+    if (!is_dir(LOG_PATH)) @mkdir(LOG_PATH, 0755, true);
+    $line = '[' . date('Y-m-d H:i:s') . "] [$context]\n$data\n\n";
+    file_put_contents(LOG_PATH . "$context.log", $line, FILE_APPEND);
+}
+
+// ── Email (PHPMailer) ─────────────────────────────────────────
+function send_verification_email(string $email, string $name, string $token): void {
+    $link = SITE_URL . '/api/verify-email.php?token=' . $token;
+    $subject = 'Verify your APEX TRADERS account';
+    $body = "
+    <div style='font-family:DM Sans,sans-serif;background:#080b10;color:#e8edf4;padding:40px;max-width:560px;margin:0 auto;border-radius:12px'>
+      <h2 style='font-size:2rem;letter-spacing:0.05em;color:#00e5ff'>▲ APEX TRADERS</h2>
+      <h3 style='margin-top:24px'>Welcome, $name!</h3>
+      <p style='color:#8a9ab0;line-height:1.7'>Your account is ready. Verify your email to unlock your 7-day free trial and start deploying bots.</p>
+      <a href='$link' style='display:inline-block;margin-top:24px;background:#00e5ff;color:#000;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none'>Verify Email →</a>
+      <p style='color:#4a5a6e;font-size:0.8rem;margin-top:32px'>If you didn't sign up for APEX TRADERS, ignore this email. Link expires in 24 hours.</p>
+    </div>";
+
+    // Use PHPMailer if available, fallback to mail()
+    if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+        try {
+            $mailer = new PHPMailer\PHPMailer\PHPMailer(true);
+            $mailer->isSMTP();
+            $mailer->Host       = SMTP_HOST;
+            $mailer->Port       = SMTP_PORT;
+            $mailer->SMTPAuth   = true;
+            $mailer->Username   = SMTP_USER;
+            $mailer->Password   = SMTP_PASS;
+            $mailer->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $mailer->setFrom(MAIL_FROM, MAIL_NAME);
+            $mailer->addAddress($email, $name);
+            $mailer->Subject = $subject;
+            $mailer->isHTML(true);
+            $mailer->Body    = $body;
+            $mailer->send();
+        } catch (Exception $e) {
+            log_error('email', $e->getMessage());
+        }
+    } else {
+        $headers  = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-type:text/html;charset=UTF-8\r\n";
+        $headers .= "From: " . MAIL_NAME . " <" . MAIL_FROM . ">\r\n";
+        @mail($email, $subject, $body, $headers);
+    }
+}
+
+// ── Email verification endpoint (inline) ─────────────────────
+// You can also put this in a separate verify-email.php file
+if (isset($_GET['token']) && strpos($_SERVER['PHP_SELF'], 'verify-email') !== false) {
+    require_once __DIR__ . '/config.php';
+    $tok = trim($_GET['token']);
+    if ($tok) {
+        $pdo  = get_db();
+        $stmt = $pdo->prepare('SELECT id FROM users WHERE email_verify_token = ? AND email_verified = 0');
+        $stmt->execute([$tok]);
+        $user = $stmt->fetch();
+        if ($user) {
+            $pdo->prepare('UPDATE users SET email_verified = 1, email_verify_token = NULL WHERE id = ?')
+                ->execute([$user['id']]);
+            header('Location: ' . SITE_URL . '/pages/dashboard.html?verified=1');
+        } else {
+            header('Location: ' . SITE_URL . '/pages/login.html?error=invalid_token');
+        }
+        exit;
+    }
+}

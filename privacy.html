@@ -1,0 +1,396 @@
+-- ============================================================
+-- APEX TRADERS — Complete Database Schema
+-- Compatible with: MySQL 8.0+ / MariaDB 10.5+
+-- Run this in your hosting control panel (phpMyAdmin or CLI)
+-- ============================================================
+
+CREATE DATABASE IF NOT EXISTS apextraders
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE apextraders;
+
+-- ─────────────────────────────────────────────
+-- USERS
+-- ─────────────────────────────────────────────
+CREATE TABLE users (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  uuid            CHAR(36)      NOT NULL UNIQUE DEFAULT (UUID()),
+  full_name       VARCHAR(120)  NOT NULL,
+  email           VARCHAR(180)  NOT NULL UNIQUE,
+  phone           VARCHAR(30)   NULL,
+  password_hash   VARCHAR(255)  NOT NULL,
+  role            ENUM('member','admin','mentor') NOT NULL DEFAULT 'member',
+  plan            ENUM('trial','recruit','operative','apex') NOT NULL DEFAULT 'trial',
+  plan_expires_at DATETIME      NULL,
+  trial_ends_at   DATETIME      NULL,
+  email_verified  TINYINT(1)    NOT NULL DEFAULT 0,
+  email_verify_token VARCHAR(100) NULL,
+  password_reset_token VARCHAR(100) NULL,
+  password_reset_expires DATETIME NULL,
+  telegram_username VARCHAR(80) NULL,
+  avatar_url      VARCHAR(500)  NULL,
+  country         VARCHAR(60)   NULL,
+  timezone        VARCHAR(60)   NOT NULL DEFAULT 'Africa/Nairobi',
+  is_active       TINYINT(1)    NOT NULL DEFAULT 1,
+  last_login_at   DATETIME      NULL,
+  last_login_ip   VARCHAR(45)   NULL,
+  created_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_email (email),
+  INDEX idx_plan (plan),
+  INDEX idx_created (created_at)
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- DERIV CONNECTIONS
+-- ─────────────────────────────────────────────
+CREATE TABLE deriv_connections (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id         INT UNSIGNED NOT NULL,
+  api_token_enc   TEXT         NOT NULL COMMENT 'AES-256 encrypted token',
+  deriv_login_id  VARCHAR(30)  NULL      COMMENT 'e.g. CR1234567',
+  account_type    ENUM('real','demo')    NOT NULL DEFAULT 'demo',
+  currency        VARCHAR(10)  NOT NULL DEFAULT 'USD',
+  balance         DECIMAL(18,4) NULL,
+  balance_updated_at DATETIME NULL,
+  is_active       TINYINT(1)   NOT NULL DEFAULT 1,
+  connected_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user (user_id)
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- SUBSCRIPTION PLANS (config)
+-- ─────────────────────────────────────────────
+CREATE TABLE plans (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  slug            VARCHAR(30)   NOT NULL UNIQUE,
+  name            VARCHAR(60)   NOT NULL,
+  price_monthly   DECIMAL(10,2) NOT NULL,
+  price_annual    DECIMAL(10,2) NOT NULL,
+  stripe_price_id_monthly VARCHAR(100) NULL,
+  stripe_price_id_annual  VARCHAR(100) NULL,
+  max_bots        TINYINT UNSIGNED NOT NULL DEFAULT 3,
+  features        JSON          NULL,
+  is_active       TINYINT(1)    NOT NULL DEFAULT 1,
+  created_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+INSERT INTO plans (slug, name, price_monthly, price_annual, max_bots, features) VALUES
+('recruit',   'Recruit',    29.00, 20.30, 3,
+ '["3 Pre-built Bots","Daily Signals","Strategy Vault (50)","Weekly Group Mentorship","Community Forum"]'),
+('operative', 'Operative',  79.00, 55.30, 12,
+ '["All 12 Bots","24/7 Real-Time Signals","Full Strategy Vault","2x Monthly 1-on-1","Custom Bot Builder","Telegram Group"]'),
+('apex',      'Apex Elite', 199.00,139.30, 12,
+ '["All Operative Features","Elite Signal Room","Unlimited 1-on-1","Priority Support","Portfolio Reviews","Account Manager"]');
+
+-- ─────────────────────────────────────────────
+-- SUBSCRIPTIONS
+-- ─────────────────────────────────────────────
+CREATE TABLE subscriptions (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id         INT UNSIGNED NOT NULL,
+  plan_id         INT UNSIGNED NOT NULL,
+  stripe_subscription_id VARCHAR(100) NULL,
+  stripe_customer_id     VARCHAR(100) NULL,
+  status          ENUM('trialing','active','past_due','cancelled','paused') NOT NULL DEFAULT 'trialing',
+  billing_cycle   ENUM('monthly','annual') NOT NULL DEFAULT 'monthly',
+  current_period_start DATETIME NULL,
+  current_period_end   DATETIME NULL,
+  cancel_at_period_end TINYINT(1) NOT NULL DEFAULT 0,
+  cancelled_at    DATETIME NULL,
+  created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id)  REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (plan_id)  REFERENCES plans(id),
+  INDEX idx_user (user_id),
+  INDEX idx_status (status)
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- PAYMENTS
+-- ─────────────────────────────────────────────
+CREATE TABLE payments (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id         INT UNSIGNED NOT NULL,
+  subscription_id INT UNSIGNED NULL,
+  amount          DECIMAL(10,2) NOT NULL,
+  currency        VARCHAR(10)  NOT NULL DEFAULT 'USD',
+  method          ENUM('stripe','mpesa','crypto','manual') NOT NULL,
+  status          ENUM('pending','succeeded','failed','refunded') NOT NULL DEFAULT 'pending',
+  -- Stripe
+  stripe_payment_intent_id VARCHAR(100) NULL,
+  -- M-Pesa
+  mpesa_transaction_id VARCHAR(50) NULL,
+  mpesa_phone      VARCHAR(20) NULL,
+  -- Crypto
+  crypto_currency  VARCHAR(20) NULL,
+  crypto_amount    DECIMAL(20,8) NULL,
+  crypto_txhash    VARCHAR(100) NULL,
+  crypto_wallet    VARCHAR(100) NULL,
+  -- Meta
+  description      VARCHAR(255) NULL,
+  metadata         JSON NULL,
+  paid_at          DATETIME NULL,
+  created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE SET NULL,
+  INDEX idx_user (user_id),
+  INDEX idx_status (status),
+  INDEX idx_method (method)
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- BOTS (catalogue)
+-- ─────────────────────────────────────────────
+CREATE TABLE bots (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  slug            VARCHAR(40)  NOT NULL UNIQUE,
+  name            VARCHAR(80)  NOT NULL,
+  description     TEXT         NULL,
+  market          ENUM('boom','crash','volatility','forex','crypto') NOT NULL,
+  market_label    VARCHAR(40)  NOT NULL COMMENT 'e.g. CRASH 500',
+  win_rate        DECIMAL(5,2) NULL,
+  avg_roi         DECIMAL(5,2) NULL,
+  total_trades    INT UNSIGNED NOT NULL DEFAULT 0,
+  risk_level      ENUM('very_low','low','medium','high','extreme') NOT NULL DEFAULT 'medium',
+  min_plan        ENUM('recruit','operative','apex') NOT NULL DEFAULT 'recruit',
+  min_stake       DECIMAL(10,2) NOT NULL DEFAULT 1.00,
+  max_stake       DECIMAL(10,2) NOT NULL DEFAULT 1000.00,
+  deriv_xml       LONGTEXT     NULL COMMENT 'DBot XML strategy definition',
+  tags            JSON         NULL,
+  is_active       TINYINT(1)   NOT NULL DEFAULT 1,
+  created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_market (market),
+  INDEX idx_plan (min_plan)
+) ENGINE=InnoDB;
+
+INSERT INTO bots (slug, name, market, market_label, win_rate, avg_roi, total_trades, risk_level, min_plan, min_stake) VALUES
+('phantom',  'Phantom Bot',  'crash',      'CRASH 500',   82.00, 3.10, 12400, 'medium',   'operative', 1.00),
+('titan',    'Titan Bot',    'boom',       'BOOM 1000',   78.00, 2.40,  9800, 'medium',   'recruit',   1.00),
+('vortex',   'Vortex Bot',   'volatility', 'VOL 75',      74.00, 2.80,  8200, 'high',     'operative', 2.00),
+('striker',  'Striker Bot',  'crash',      'CRASH 1000',  80.00, 2.90,  6500, 'medium',   'operative', 1.00),
+('nova',     'Nova Bot',     'boom',       'BOOM 500',    76.00, 2.20,  5100, 'low',      'recruit',   1.00),
+('reaper',   'Reaper Bot',   'volatility', 'VOL 100',     71.00, 3.80,  4700, 'high',     'apex',      5.00),
+('specter',  'Specter Bot',  'forex',      'EUR/USD',     77.00, 2.10, 11300, 'low',      'operative', 1.00),
+('raptor',   'Raptor Bot',   'boom',       'BOOM 300',    73.00, 3.30,  3900, 'high',     'apex',      3.00),
+('oracle',   'Oracle Bot',   'volatility', 'VOL 50',      79.00, 2.50,  7200, 'medium',   'operative', 2.00),
+('sentinel', 'Sentinel Bot', 'crash',      'CRASH 300',   84.00, 1.90,  8800, 'very_low', 'recruit',   1.00),
+('blaze',    'Blaze Bot',    'forex',      'GBP/USD',     75.00, 2.60,  6100, 'medium',   'operative', 1.00),
+('eclipse',  'Eclipse Bot',  'volatility', 'VOL 200',     69.00, 4.20,  2400, 'extreme',  'apex',      10.00);
+
+-- ─────────────────────────────────────────────
+-- BOT DEPLOYMENTS (per user)
+-- ─────────────────────────────────────────────
+CREATE TABLE bot_deployments (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id         INT UNSIGNED NOT NULL,
+  bot_id          INT UNSIGNED NOT NULL,
+  deriv_conn_id   INT UNSIGNED NOT NULL,
+  status          ENUM('running','paused','stopped','error') NOT NULL DEFAULT 'running',
+  stake_amount    DECIMAL(10,2) NOT NULL,
+  stop_loss       DECIMAL(10,2) NULL,
+  take_profit     DECIMAL(10,2) NULL,
+  martingale      DECIMAL(5,2)  NOT NULL DEFAULT 2.00,
+  trades_count    INT UNSIGNED  NOT NULL DEFAULT 0,
+  total_profit    DECIMAL(18,4) NOT NULL DEFAULT 0,
+  win_count       INT UNSIGNED  NOT NULL DEFAULT 0,
+  loss_count      INT UNSIGNED  NOT NULL DEFAULT 0,
+  last_trade_at   DATETIME      NULL,
+  started_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  stopped_at      DATETIME      NULL,
+  created_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id)       REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (bot_id)        REFERENCES bots(id),
+  FOREIGN KEY (deriv_conn_id) REFERENCES deriv_connections(id) ON DELETE CASCADE,
+  INDEX idx_user (user_id),
+  INDEX idx_status (status)
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- TRADE LOG
+-- ─────────────────────────────────────────────
+CREATE TABLE trade_log (
+  id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  deployment_id   INT UNSIGNED NOT NULL,
+  user_id         INT UNSIGNED NOT NULL,
+  deriv_contract_id VARCHAR(50) NULL,
+  market          VARCHAR(40)  NOT NULL,
+  contract_type   VARCHAR(30)  NOT NULL COMMENT 'CALL, PUT, etc.',
+  stake           DECIMAL(10,4) NOT NULL,
+  payout          DECIMAL(10,4) NULL,
+  profit          DECIMAL(10,4) NULL,
+  result          ENUM('win','loss','tie','open') NOT NULL DEFAULT 'open',
+  entry_spot      DECIMAL(20,6) NULL,
+  exit_spot       DECIMAL(20,6) NULL,
+  duration        INT UNSIGNED  NULL COMMENT 'seconds',
+  opened_at       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  closed_at       DATETIME      NULL,
+  FOREIGN KEY (deployment_id) REFERENCES bot_deployments(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id)       REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user (user_id),
+  INDEX idx_deployment (deployment_id),
+  INDEX idx_opened (opened_at),
+  INDEX idx_result (result)
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- SIGNALS
+-- ─────────────────────────────────────────────
+CREATE TABLE signals (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  market          VARCHAR(40)  NOT NULL,
+  direction       ENUM('BUY','SELL') NOT NULL,
+  entry_price     DECIMAL(20,6) NOT NULL,
+  stop_loss       DECIMAL(20,6) NULL,
+  take_profit     DECIMAL(20,6) NULL,
+  confidence      ENUM('low','medium','high') NOT NULL DEFAULT 'medium',
+  min_plan        ENUM('recruit','operative','apex') NOT NULL DEFAULT 'recruit',
+  notes           TEXT         NULL,
+  result          ENUM('pending','win','loss','cancelled') NOT NULL DEFAULT 'pending',
+  expires_at      DATETIME     NULL,
+  created_by      INT UNSIGNED NULL,
+  created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_market (market),
+  INDEX idx_direction (direction),
+  INDEX idx_created (created_at)
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- MENTORSHIP SESSIONS
+-- ─────────────────────────────────────────────
+CREATE TABLE mentorship_sessions (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title           VARCHAR(200) NOT NULL,
+  description     TEXT         NULL,
+  type            ENUM('group','one_on_one','elite') NOT NULL DEFAULT 'group',
+  min_plan        ENUM('recruit','operative','apex') NOT NULL DEFAULT 'recruit',
+  mentor_id       INT UNSIGNED NULL,
+  starts_at       DATETIME     NOT NULL,
+  duration_mins   SMALLINT UNSIGNED NOT NULL DEFAULT 60,
+  meeting_link    VARCHAR(500) NULL,
+  recording_url   VARCHAR(500) NULL,
+  max_attendees   SMALLINT UNSIGNED NULL,
+  status          ENUM('scheduled','live','completed','cancelled') NOT NULL DEFAULT 'scheduled',
+  created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_starts (starts_at),
+  INDEX idx_type (type)
+) ENGINE=InnoDB;
+
+CREATE TABLE session_registrations (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  session_id      INT UNSIGNED NOT NULL,
+  user_id         INT UNSIGNED NOT NULL,
+  registered_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  attended        TINYINT(1)   NOT NULL DEFAULT 0,
+  UNIQUE KEY uq_session_user (session_id, user_id),
+  FOREIGN KEY (session_id) REFERENCES mentorship_sessions(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id)    REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- STRATEGIES (vault)
+-- ─────────────────────────────────────────────
+CREATE TABLE strategies (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title           VARCHAR(200) NOT NULL,
+  slug            VARCHAR(100) NOT NULL UNIQUE,
+  description     TEXT         NULL,
+  content         LONGTEXT     NULL COMMENT 'Full strategy description (HTML or MD)',
+  market          VARCHAR(40)  NULL,
+  risk_level      ENUM('very_low','low','medium','high','extreme') NOT NULL DEFAULT 'medium',
+  win_rate        DECIMAL(5,2) NULL,
+  min_plan        ENUM('recruit','operative','apex') NOT NULL DEFAULT 'recruit',
+  tags            JSON         NULL,
+  view_count      INT UNSIGNED NOT NULL DEFAULT 0,
+  created_by      INT UNSIGNED NULL,
+  is_published    TINYINT(1)   NOT NULL DEFAULT 1,
+  created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_market (market),
+  INDEX idx_plan (min_plan)
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- NOTIFICATIONS
+-- ─────────────────────────────────────────────
+CREATE TABLE notifications (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id         INT UNSIGNED NOT NULL,
+  type            VARCHAR(50)  NOT NULL COMMENT 'signal, bot_alert, payment, system',
+  title           VARCHAR(200) NOT NULL,
+  body            TEXT         NULL,
+  is_read         TINYINT(1)   NOT NULL DEFAULT 0,
+  action_url      VARCHAR(500) NULL,
+  created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_read (user_id, is_read),
+  INDEX idx_created (created_at)
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- AUDIT LOG
+-- ─────────────────────────────────────────────
+CREATE TABLE audit_log (
+  id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id         INT UNSIGNED NULL,
+  action          VARCHAR(100) NOT NULL,
+  entity_type     VARCHAR(50)  NULL,
+  entity_id       INT UNSIGNED NULL,
+  old_values      JSON         NULL,
+  new_values      JSON         NULL,
+  ip_address      VARCHAR(45)  NULL,
+  user_agent      VARCHAR(500) NULL,
+  created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_user (user_id),
+  INDEX idx_action (action),
+  INDEX idx_created (created_at)
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────
+-- ADMIN: seed first admin user
+-- Password: Change_Me_Admin!2025  (bcrypt hash below)
+-- Run: php -r "echo password_hash('Change_Me_Admin!2025', PASSWORD_BCRYPT);"
+-- ─────────────────────────────────────────────
+INSERT INTO users (full_name, email, password_hash, role, plan, email_verified)
+VALUES ('APEX Admin', 'admin@apextraders.io',
+        '$2y$12$PLACEHOLDER_REPLACE_WITH_REAL_BCRYPT_HASH',
+        'admin', 'apex', 1);
+
+-- ─────────────────────────────────────────────
+-- VIEWS for dashboard queries
+-- ─────────────────────────────────────────────
+CREATE OR REPLACE VIEW v_user_stats AS
+SELECT
+  u.id                                    AS user_id,
+  u.full_name,
+  u.email,
+  u.plan,
+  COUNT(DISTINCT bd.id)                   AS active_bots,
+  COALESCE(SUM(bd.total_profit), 0)       AS total_profit,
+  COALESCE(SUM(bd.trades_count), 0)       AS total_trades,
+  COALESCE(SUM(bd.win_count), 0)          AS total_wins,
+  CASE WHEN SUM(bd.trades_count) > 0
+       THEN ROUND(SUM(bd.win_count) / SUM(bd.trades_count) * 100, 2)
+       ELSE 0 END                         AS win_rate_pct
+FROM users u
+LEFT JOIN bot_deployments bd ON bd.user_id = u.id AND bd.status = 'running'
+GROUP BY u.id;
+
+-- Monthly revenue view
+CREATE OR REPLACE VIEW v_monthly_revenue AS
+SELECT
+  DATE_FORMAT(paid_at, '%Y-%m') AS month,
+  method,
+  COUNT(*)                       AS payment_count,
+  SUM(amount)                    AS total_revenue
+FROM payments
+WHERE status = 'succeeded'
+GROUP BY DATE_FORMAT(paid_at, '%Y-%m'), method
+ORDER BY month DESC;

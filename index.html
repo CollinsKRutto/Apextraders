@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — APEX TRADERS</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/pages.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body class="dashboard-body">
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursorTrail"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-mark">▲</span>
+    <span class="logo-text">APEX<em>TRADERS</em></span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sn-link active"><span class="sn-icon">⬛</span> Dashboard</a>
+    <a href="bots.html" class="sn-link"><span class="sn-icon">🤖</span> My Bots</a>
+    <a href="strategies.html" class="sn-link"><span class="sn-icon">📊</span> Strategies</a>
+    <a href="mentorship.html" class="sn-link"><span class="sn-icon">🎯</span> Mentorship</a>
+    <a href="#" class="sn-link"><span class="sn-icon">💬</span> Community</a>
+    <a href="#" class="sn-link"><span class="sn-icon">📈</span> Reports</a>
+    <div class="sn-divider"></div>
+    <a href="checkout.html" class="sn-link"><span class="sn-icon">⭐</span> Upgrade Plan</a>
+    <a href="#" class="sn-link"><span class="sn-icon">⚙</span> Settings</a>
+    <a href="login.html" class="sn-link sn-logout"><span class="sn-icon">↩</span> Sign Out</a>
+  </nav>
+  <div class="sidebar-plan">
+    <div class="sp-tier">OPERATIVE</div>
+    <div class="sp-bar"><div class="sp-fill" style="width:60%"></div></div>
+    <div class="sp-text">18 days remaining in billing cycle</div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="dash-main">
+  <!-- Top bar -->
+  <header class="dash-header">
+    <div>
+      <h2 class="dash-greeting" id="greeting">Good evening, Trader 👋</h2>
+      <p style="font-size:0.82rem;color:var(--text-3)">Friday, 15 May 2026 · Nairobi, KE</p>
+    </div>
+    <div class="dash-header-right">
+      <div class="deriv-status">
+        <span class="pulse-dot"></span>
+        <span style="font-size:0.82rem;color:var(--text-2)">Deriv Connected</span>
+      </div>
+      <div class="avatar-btn">JD</div>
+    </div>
+  </header>
+
+  <!-- Alert banner if welcome -->
+  <div class="welcome-banner" id="welcomeBanner" style="display:none">
+    🎉 Welcome to APEX TRADERS! Your 7-day free trial is active. <a href="bots.html">Deploy your first bot →</a>
+  </div>
+
+  <!-- Stats row -->
+  <div class="dash-stats">
+    <div class="ds-card">
+      <div class="ds-label">Total Profit (MTD)</div>
+      <div class="ds-value green">+$1,247.80</div>
+      <div class="ds-change green">▲ 14.2% vs last month</div>
+    </div>
+    <div class="ds-card">
+      <div class="ds-label">Active Bots</div>
+      <div class="ds-value">3 / 12</div>
+      <div class="ds-change">2 paused · 7 available</div>
+    </div>
+    <div class="ds-card">
+      <div class="ds-label">Win Rate (30d)</div>
+      <div class="ds-value">74.3%</div>
+      <div class="ds-change green">▲ +3.1% vs prior period</div>
+    </div>
+    <div class="ds-card">
+      <div class="ds-label">Trades Today</div>
+      <div class="ds-value">48</div>
+      <div class="ds-change">31 wins · 17 losses</div>
+    </div>
+  </div>
+
+  <!-- Chart + Bots row -->
+  <div class="dash-mid">
+    <!-- Performance chart -->
+    <div class="dash-card dash-chart-card">
+      <div class="dc-header">
+        <span class="dc-title">Performance Overview</span>
+        <select class="dc-period">
+          <option>Last 30 days</option>
+          <option>Last 7 days</option>
+          <option>This year</option>
+        </select>
+      </div>
+      <canvas id="perfChart" height="180"></canvas>
+    </div>
+
+    <!-- Active bots -->
+    <div class="dash-card">
+      <div class="dc-header">
+        <span class="dc-title">Active Bots</span>
+        <a href="bots.html" style="font-size:0.8rem;color:var(--accent)">Manage →</a>
+      </div>
+      <div class="bot-list">
+        <div class="bl-item">
+          <div>
+            <div style="font-weight:600;font-size:0.9rem">Phantom Bot</div>
+            <div style="font-size:0.78rem;color:var(--text-3)">CRASH 500 · Stake: $5</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:var(--green);font-size:0.88rem">+$412.30</div>
+            <div class="bot-status live" style="font-size:0.72rem">● RUNNING</div>
+          </div>
+        </div>
+        <div class="bl-item">
+          <div>
+            <div style="font-weight:600;font-size:0.9rem">Titan Bot</div>
+            <div style="font-size:0.78rem;color:var(--text-3)">BOOM 1000 · Stake: $3</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:var(--green);font-size:0.88rem">+$218.50</div>
+            <div class="bot-status live" style="font-size:0.72rem">● RUNNING</div>
+          </div>
+        </div>
+        <div class="bl-item">
+          <div>
+            <div style="font-weight:600;font-size:0.9rem">Vortex Bot</div>
+            <div style="font-size:0.78rem;color:var(--text-3)">VOL 75 · Stake: $2</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:var(--green);font-size:0.88rem">+$617.00</div>
+            <div class="bot-status live" style="font-size:0.72rem">● RUNNING</div>
+          </div>
+        </div>
+      </div>
+      <a href="bots.html" class="btn-outline" style="display:block;text-align:center;margin-top:16px;font-size:0.85rem;padding:10px">+ Deploy More Bots</a>
+    </div>
+  </div>
+
+  <!-- Signals + Upcoming -->
+  <div class="dash-bottom">
+    <div class="dash-card">
+      <div class="dc-header">
+        <span class="dc-title">Latest Signals</span>
+        <span style="font-size:0.78rem;color:var(--text-3)">Updated 2 min ago</span>
+      </div>
+      <div class="signal-list">
+        <div class="sig-item"><span class="sig-dir buy">BUY</span><span class="sig-asset">BOOM 1000</span><span class="sig-entry">Entry: 48,231.50</span><span class="sig-conf high">High Confidence</span></div>
+        <div class="sig-item"><span class="sig-dir sell">SELL</span><span class="sig-asset">EUR/USD</span><span class="sig-entry">Entry: 1.08420</span><span class="sig-conf med">Medium</span></div>
+        <div class="sig-item"><span class="sig-dir buy">BUY</span><span class="sig-asset">VOLATILITY 25</span><span class="sig-entry">Entry: 9,847.20</span><span class="sig-conf high">High Confidence</span></div>
+        <div class="sig-item"><span class="sig-dir sell">SELL</span><span class="sig-asset">CRASH 500</span><span class="sig-entry">Entry: 5,120.80</span><span class="sig-conf high">High Confidence</span></div>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dc-header"><span class="dc-title">Upcoming Sessions</span></div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="session-item">
+          <div class="si-date">Today · 8:00 PM EAT</div>
+          <div class="si-title">Live Market Analysis — Crash & Boom</div>
+          <a href="#" class="si-join">Join →</a>
+        </div>
+        <div class="session-item">
+          <div class="si-date">Sat, 17 May · 10:00 AM EAT</div>
+          <div class="si-title">Bot Configuration Workshop</div>
+          <a href="#" class="si-join">RSVP →</a>
+        </div>
+        <div class="session-item">
+          <div class="si-date">Mon, 19 May · 7:00 PM EAT</div>
+          <div class="si-title">1-on-1 Mentorship (your slot)</div>
+          <a href="#" class="si-join">Reschedule →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<style>
+.dashboard-body { display:flex; min-height:100vh; background:var(--bg); cursor:none; }
+
+/* Sidebar */
+.sidebar {
+  width:240px; flex-shrink:0; background:var(--bg-2);
+  border-right:1px solid var(--border); display:flex; flex-direction:column;
+  padding:24px 0; position:fixed; top:0; bottom:0; left:0; z-index:50;
+}
+.sidebar-logo { display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-size:1.2rem; letter-spacing:0.08em; padding:0 24px 24px; border-bottom:1px solid var(--border); margin-bottom:16px; }
+.sidebar-nav { display:flex; flex-direction:column; gap:2px; flex:1; padding:0 12px; }
+.sn-link { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius); font-size:0.88rem; color:var(--text-2); transition:all 0.2s; cursor:none; }
+.sn-link:hover { background:var(--surface); color:var(--text); }
+.sn-link.active { background:var(--accent-dim); color:var(--accent); }
+.sn-icon { font-size:0.95rem; width:20px; text-align:center; }
+.sn-divider { height:1px; background:var(--border); margin:12px 0; }
+.sn-logout { color:var(--text-3) !important; }
+.sn-logout:hover { color:var(--red) !important; background:rgba(255,77,77,0.06) !important; }
+.sidebar-plan { padding:16px; margin:0 12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); }
+.sp-tier { font-family:var(--font-mono); font-size:0.65rem; letter-spacing:0.15em; color:var(--accent); margin-bottom:8px; }
+.sp-bar { height:3px; background:var(--border); border-radius:2px; margin-bottom:6px; }
+.sp-fill { height:100%; background:var(--accent); border-radius:2px; }
+.sp-text { font-size:0.72rem; color:var(--text-3); }
+
+/* Main */
+.dash-main { margin-left:240px; flex:1; padding:0 32px 60px; min-height:100vh; }
+.dash-header { display:flex; justify-content:space-between; align-items:center; padding:28px 0 24px; border-bottom:1px solid var(--border); margin-bottom:28px; }
+.dash-greeting { font-family:var(--font-display); font-size:1.8rem; letter-spacing:0.04em; }
+.dash-header-right { display:flex; align-items:center; gap:20px; }
+.deriv-status { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:8px 16px; }
+.avatar-btn { width:38px; height:38px; border-radius:50%; background:var(--accent-dim); border:1px solid rgba(0,229,255,0.2); color:var(--accent); font-family:var(--font-mono); font-size:0.75rem; display:flex; align-items:center; justify-content:center; cursor:none; }
+.welcome-banner { background:rgba(0,229,255,0.06); border:1px solid rgba(0,229,255,0.2); border-radius:var(--radius); padding:14px 20px; margin-bottom:24px; font-size:0.88rem; }
+.welcome-banner a { color:var(--accent); }
+
+/* Stats */
+.dash-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+.ds-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px 20px; }
+.ds-label { font-size:0.78rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
+.ds-value { font-family:var(--font-display); font-size:2rem; letter-spacing:0.03em; margin-bottom:4px; }
+.ds-change { font-size:0.78rem; color:var(--text-3); }
+.ds-change.green { color:var(--green); }
+.ds-value.green { color:var(--green); }
+
+/* Mid */
+.dash-mid { display:grid; grid-template-columns:1.8fr 1fr; gap:16px; margin-bottom:24px; }
+.dash-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px; }
+.dash-chart-card canvas { width:100% !important; }
+.dc-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.dc-title { font-weight:600; font-size:0.95rem; }
+.dc-period { background:var(--surface-2); border:1px solid var(--border); border-radius:6px; color:var(--text-2); font-family:var(--font-body); font-size:0.8rem; padding:6px 10px; cursor:pointer; outline:none; }
+.bot-list { display:flex; flex-direction:column; gap:0; }
+.bl-item { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--border); }
+.bl-item:last-child { border-bottom:none; }
+
+/* Bottom */
+.dash-bottom { display:grid; grid-template-columns:1.2fr 1fr; gap:16px; }
+.signal-list { display:flex; flex-direction:column; gap:0; }
+.sig-item { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); font-size:0.85rem; }
+.sig-item:last-child { border-bottom:none; }
+.sig-dir { font-family:var(--font-mono); font-size:0.7rem; font-weight:700; letter-spacing:0.08em; padding:3px 10px; border-radius:4px; }
+.sig-dir.buy { background:rgba(0,230,118,0.12); color:var(--green); }
+.sig-dir.sell { background:rgba(255,77,77,0.12); color:var(--red); }
+.sig-asset { font-weight:600; flex:1; }
+.sig-entry { color:var(--text-3); font-family:var(--font-mono); font-size:0.78rem; }
+.sig-conf { font-size:0.72rem; padding:2px 8px; border-radius:10px; white-space:nowrap; }
+.sig-conf.high { background:rgba(0,230,118,0.1); color:var(--green); }
+.sig-conf.med { background:rgba(245,200,66,0.1); color:var(--gold); }
+.session-item { padding:14px 0; border-bottom:1px solid var(--border); }
+.session-item:last-child { border-bottom:none; }
+.si-date { font-family:var(--font-mono); font-size:0.72rem; color:var(--accent); margin-bottom:4px; letter-spacing:0.05em; }
+.si-title { font-size:0.88rem; font-weight:500; margin-bottom:6px; }
+.si-join { font-size:0.8rem; color:var(--accent); }
+@media(max-width:1100px){ .dash-stats{grid-template-columns:1fr 1fr;} .dash-mid,.dash-bottom{grid-template-columns:1fr;} }
+@media(max-width:768px){ .sidebar{transform:translateX(-100%);} .dash-main{margin-left:0;padding:0 16px 40px;} }
+</style>
+
+<script src="../assets/js/main.js"></script>
+<script>
+// Greeting
+const hr = new Date().getHours();
+const gMap = [[5,'Good morning'],[12,'Good afternoon'],[17,'Good evening'],[21,'Good night']];
+const greet = gMap.reduce((acc,[h,g]) => new Date().getHours() >= h ? g : acc, 'Hello');
+document.getElementById('greeting').textContent = greet + ', Trader 👋';
+
+// Welcome banner
+if (new URLSearchParams(window.location.search).get('welcome'))
+  document.getElementById('welcomeBanner').style.display = 'block';
+
+// Simple performance chart using canvas
+const canvas = document.getElementById('perfChart');
+const ctx = canvas.getContext('2d');
+canvas.width = canvas.offsetWidth * devicePixelRatio;
+canvas.height = 180 * devicePixelRatio;
+ctx.scale(devicePixelRatio, devicePixelRatio);
+const W = canvas.offsetWidth, H = 180;
+const data = [820,940,880,1050,990,1120,1080,1200,1150,1310,1270,1390,1350,1480,1420,1580,1520,1640,1590,1720,1680,1800,1750,1870,1820,1950,1900,2010,1970,2100];
+const min = Math.min(...data), max = Math.max(...data), range = max - min;
+const pts = data.map((v,i) => [i/(data.length-1)*W, H - 20 - (v-min)/range*(H-40)]);
+
+// gradient fill
+const grad = ctx.createLinearGradient(0,0,0,H);
+grad.addColorStop(0,'rgba(0,229,255,0.2)');
+grad.addColorStop(1,'rgba(0,229,255,0)');
+
+ctx.beginPath();
+ctx.moveTo(pts[0][0], H);
+ctx.lineTo(pts[0][0], pts[0][1]);
+pts.forEach(([x,y]) => ctx.lineTo(x,y));
+ctx.lineTo(pts[pts.length-1][0], H);
+ctx.closePath();
+ctx.fillStyle = grad;
+ctx.fill();
+
+ctx.beginPath();
+pts.forEach(([x,y],i) => i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y));
+ctx.strokeStyle = '#00e5ff';
+ctx.lineWidth = 2;
+ctx.stroke();
+</script>
+</body>
+</html>

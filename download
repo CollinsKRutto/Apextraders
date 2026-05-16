@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — APEX TRADERS</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/pages.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursorTrail"></div>
+<nav class="nav" id="nav">
+  <a href="../index.html" class="nav-logo">
+    <span class="logo-mark">▲</span>
+    <span class="logo-text">APEX<em>TRADERS</em></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="register.html" class="nav-cta">Join Now</a></li>
+  </ul>
+</nav>
+<div class="page-hero">
+  <div class="container">
+    <div class="section-tag">SUPPORT</div>
+    <h1>Get In Touch</h1>
+    <p>We respond to all messages within 24 hours. Premium members get priority support.</p>
+  </div>
+</div>
+<section class="section" style="background:var(--bg)">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:80px;align-items:start">
+      <div>
+        <h2 class="section-title">Let's Talk.</h2>
+        <p style="color:var(--text-2);margin-bottom:40px">Whether you need help with your bots, have a billing question, or just want to know if APEX is right for you — we're here.</p>
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-dim);border:1px solid rgba(0,229,255,0.2);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0">✈</div>
+            <div><strong>Telegram</strong><br><a href="https://t.me/apextradersofficial" style="color:var(--accent)">@ApexTradersOfficial</a><br><span style="font-size:0.82rem;color:var(--text-3)">Fastest response — usually under 1 hour</span></div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-dim);border:1px solid rgba(0,229,255,0.2);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0">✉</div>
+            <div><strong>Email</strong><br><a href="mailto:support@apextraders.io" style="color:var(--accent)">support@apextraders.io</a><br><span style="font-size:0.82rem;color:var(--text-3)">Response within 24 hours</span></div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-dim);border:1px solid rgba(0,229,255,0.2);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0">◈</div>
+            <div><strong>Live Chat</strong><br><span style="color:var(--text-2)">Available in your Dashboard</span><br><span style="font-size:0.82rem;color:var(--text-3)">Mon–Fri, 8AM–10PM EAT</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px">
+        <h3 style="font-family:var(--font-display);font-size:1.6rem;margin-bottom:24px">Send a Message</h3>
+        <div class="form-success" id="contactSuccess">Message sent! We'll get back to you within 24 hours.</div>
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="cfName" placeholder="John" /></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="cfLast" placeholder="Doe" /></div>
+        </div>
+        <div class="form-group"><label>Email</label><input type="email" id="cfEmail" placeholder="you@example.com" /></div>
+        <div class="form-group">
+          <label>Subject</label>
+          <select id="cfSubject">
+            <option>General Inquiry</option>
+            <option>Bot Support</option>
+            <option>Billing / Payments</option>
+            <option>Partnership / Affiliate</option>
+            <option>Technical Issue</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Message</label><textarea id="cfMsg" rows="5" placeholder="Tell us how we can help…"></textarea></div>
+        <button class="btn-primary btn-full" onclick="submitContact()">Send Message <span>→</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+<script src="../assets/js/main.js"></script>
+<script>
+function submitContact() {
+  const email = document.getElementById('cfEmail').value.trim();
+  const msg = document.getElementById('cfMsg').value.trim();
+  if (!email || !msg) { alert('Please fill in your email and message.'); return; }
+  // POST to /api/contact.php in production
+  document.getElementById('contactSuccess').classList.add('show');
+  document.getElementById('cfMsg').value = '';
+}
+</script>
+</body>
+</html>

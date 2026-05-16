@@ -1,0 +1,133 @@
+<?php
+// api/stripe-webhook.php
+// Register this URL in Stripe Dashboard → Webhooks
+header('Content-Type: application/json');
+require_once 'config.php';
+require_once 'helpers.php';
+
+$payload   = file_get_contents('php://input');
+$sigHeader = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
+
+try {
+    require_once __DIR__ . '/vendor/autoload.php';
+    $event = \Stripe\Webhook::constructEvent($payload, $sigHeader, STRIPE_WEBHOOK_SECRET);
+} catch (\UnexpectedValueException $e) {
+    http_response_code(400); echo json_encode(['error' => 'Invalid payload']); exit;
+} catch (\Stripe\Exception\SignatureVerificationException $e) {
+    http_response_code(400); echo json_encode(['error' => 'Invalid signature']); exit;
+}
+
+$pdo = get_db();
+
+switch ($event->type) {
+
+    // ── Subscription created / trial started ──
+    case 'customer.subscription.created':
+    case 'checkout.session.completed': {
+        $obj     = $event->data->object;
+        $meta    = $obj->metadata ?? null;
+        $userId  = $meta->apex_user_id ?? null;
+        $planSlug = $meta->plan ?? 'operative';
+        if (!$userId) break;
+
+        $sub = ($event->type === 'checkout.session.completed')
+            ? \Stripe\Subscription::retrieve($obj->subscription)
+            : $obj;
+
+        $planStmt = $pdo->prepare('SELECT id FROM plans WHERE slug = ?');
+        $planStmt->execute([$planSlug]);
+        $planRow = $planStmt->fetch(PDO::FETCH_ASSOC);
+
+        $status   = $sub->status; // trialing, active, etc.
+        $start    = date('Y-m-d H:i:s', $sub->current_period_start);
+        $end      = date('Y-m-d H:i:s', $sub->current_period_end);
+
+        // Upsert subscription
+        $pdo->prepare('
+            INSERT INTO subscriptions (user_id, plan_id, stripe_subscription_id, stripe_customer_id,
+                status, billing_cycle, current_period_start, current_period_end)
+            VALUES (?, ?, ?, ?, ?, \'monthly\', ?, ?)
+            ON DUPLICATE KEY UPDATE
+                stripe_subscription_id = VALUES(stripe_subscription_id),
+                stripe_customer_id     = VALUES(stripe_customer_id),
+                status                 = VALUES(status),
+                current_period_start   = VALUES(current_period_start),
+                current_period_end     = VALUES(current_period_end)
+        ')->execute([$userId, $planRow['id'] ?? null, $sub->id, $sub->customer, $status, $start, $end]);
+
+        // Update user plan
+        $newPlan = ($status === 'trialing') ? 'trial' : $planSlug;
+        $pdo->prepare('UPDATE users SET plan = ?, plan_expires_at = ? WHERE id = ?')
+            ->execute([$newPlan, $end, $userId]);
+        break;
+    }
+
+    // ── Payment succeeded ──
+    case 'invoice.payment_succeeded': {
+        $inv    = $event->data->object;
+        $subId  = $inv->subscription;
+        $amount = $inv->amount_paid / 100;
+
+        $subRow = $pdo->prepare('SELECT * FROM subscriptions WHERE stripe_subscription_id = ?');
+        $subRow->execute([$subId]);
+        $sub    = $subRow->fetch(PDO::FETCH_ASSOC);
+        if (!$sub) break;
+
+        // Record payment
+        $pdo->prepare('
+            INSERT INTO payments (user_id, subscription_id, amount, currency, method, status,
+                stripe_payment_intent_id, description, paid_at)
+            VALUES (?, ?, ?, \'USD\', \'stripe\', \'succeeded\', ?, \'Monthly subscription\', NOW())
+        ')->execute([$sub['user_id'], $sub['id'], $amount, $inv->payment_intent]);
+
+        // Activate plan
+        $planStmt = $pdo->prepare('SELECT slug FROM plans WHERE id = ?');
+        $planStmt->execute([$sub['plan_id']]);
+        $planRow = $planStmt->fetch(PDO::FETCH_ASSOC);
+        $end = date('Y-m-d H:i:s', $inv->lines->data[0]->period->end ?? strtotime('+1 month'));
+
+        $pdo->prepare('UPDATE users SET plan = ?, plan_expires_at = ? WHERE id = ?')
+            ->execute([$planRow['slug'], $end, $sub['user_id']]);
+        $pdo->prepare('UPDATE subscriptions SET status = \'active\', current_period_end = ? WHERE id = ?')
+            ->execute([$end, $sub['id']]);
+        break;
+    }
+
+    // ── Payment failed ──
+    case 'invoice.payment_failed': {
+        $inv   = $event->data->object;
+        $subId = $inv->subscription;
+        $subRow = $pdo->prepare('SELECT user_id FROM subscriptions WHERE stripe_subscription_id = ?');
+        $subRow->execute([$subId]);
+        $sub = $subRow->fetch(PDO::FETCH_ASSOC);
+        if ($sub) {
+            $pdo->prepare('UPDATE subscriptions SET status = \'past_due\' WHERE stripe_subscription_id = ?')
+                ->execute([$subId]);
+            // Send notification
+            $pdo->prepare('
+                INSERT INTO notifications (user_id, type, title, body, action_url)
+                VALUES (?, \'payment\', \'Payment Failed\', \'Your subscription payment failed. Update your payment method.\', \'/pages/checkout.html\')
+            ')->execute([$sub['user_id']]);
+        }
+        break;
+    }
+
+    // ── Subscription cancelled ──
+    case 'customer.subscription.deleted': {
+        $sub = $event->data->object;
+        $pdo->prepare('UPDATE subscriptions SET status = \'cancelled\', cancelled_at = NOW() WHERE stripe_subscription_id = ?')
+            ->execute([$sub->id]);
+        // Downgrade user
+        $subRow = $pdo->prepare('SELECT user_id FROM subscriptions WHERE stripe_subscription_id = ?');
+        $subRow->execute([$sub->id]);
+        $row = $subRow->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $pdo->prepare('UPDATE users SET plan = \'trial\', plan_expires_at = NULL WHERE id = ?')
+                ->execute([$row['user_id']]);
+        }
+        break;
+    }
+}
+
+http_response_code(200);
+echo json_encode(['received' => true]);

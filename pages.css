@@ -1,0 +1,60 @@
+<?php
+// api/config.php — Central configuration
+// !! Replace all placeholder values before deploying !!
+
+define('DB_HOST',     'localhost');
+define('DB_NAME',     'apextraders');
+define('DB_USER',     'apextraders_user');   // create in cPanel/hosting
+define('DB_PASS',     'REPLACE_DB_PASSWORD');
+define('DB_CHARSET',  'utf8mb4');
+
+define('SITE_URL',    'https://www.apextraders.io'); // your domain
+
+// JWT — generate a secure random secret: php -r "echo bin2hex(random_bytes(32));"
+define('JWT_SECRET',  'REPLACE_WITH_64_CHAR_HEX_STRING');
+
+// Encryption key for Deriv API tokens (32 bytes hex)
+define('ENCRYPTION_KEY', 'REPLACE_WITH_64_CHAR_HEX_KEY');
+define('ENCRYPTION_IV',  'REPLACE_WITH_32_CHAR_HEX_IV');
+
+// Stripe — get from https://dashboard.stripe.com/apikeys
+define('STRIPE_PUBLISHABLE_KEY', 'pk_live_REPLACE');
+define('STRIPE_SECRET_KEY',      'sk_live_REPLACE');
+define('STRIPE_WEBHOOK_SECRET',  'whsec_REPLACE');
+
+// M-Pesa Daraja — https://developer.safaricom.co.ke
+define('MPESA_CONSUMER_KEY',    'REPLACE');
+define('MPESA_CONSUMER_SECRET', 'REPLACE');
+define('MPESA_SHORTCODE',       '174379'); // test or your paybill
+define('MPESA_PASSKEY',         'REPLACE');
+define('USDKES_RATE',           130);      // update periodically
+
+// Crypto wallet addresses
+define('CRYPTO_WALLET_USDT_TRC20', 'REPLACE_WITH_YOUR_TRON_WALLET');
+define('CRYPTO_WALLET_USDT_ERC20', 'REPLACE_WITH_YOUR_ETH_WALLET');
+define('CRYPTO_WALLET_BTC',        'REPLACE_WITH_YOUR_BTC_WALLET');
+
+// Email (SMTP via PHPMailer or native mail)
+define('MAIL_FROM',  'noreply@apextraders.io');
+define('MAIL_NAME',  'APEX TRADERS');
+define('SMTP_HOST',  'smtp.example.com');
+define('SMTP_PORT',  587);
+define('SMTP_USER',  'REPLACE');
+define('SMTP_PASS',  'REPLACE');
+
+// Error log path
+define('LOG_PATH', __DIR__ . '/../logs/');
+
+// PDO singleton
+function get_db(): PDO {
+    static $pdo = null;
+    if ($pdo === null) {
+        $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
+        $pdo = new PDO($dsn, DB_USER, DB_PASS, [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ]);
+    }
+    return $pdo;
+}
