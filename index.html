@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APEX TRADERS — Dominate the Deriv Markets</title>
+  <meta name="description" content="APEX TRADERS — Elite Deriv trading community. Access battle-tested strategies, AI-powered bots, and real-time mentorship to conquer the markets." />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ═══════════════════════════ CURSOR ═══════════════════════════ -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursorTrail"></div>
+
+<!-- ═══════════════════════════ NAV ═══════════════════════════ -->
+<nav class="nav" id="nav">
+  <div class="nav-logo">
+    <span class="logo-mark">▲</span>
+    <span class="logo-text">APEX<em>TRADERS</em></span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">Strategy</a></li>
+    <li><a href="#bots">Bots</a></li>
+    <li><a href="#plans">Plans</a></li>
+    <li><a href="#community">Community</a></li>
+    <li><a href="pages/login.html" class="nav-login">Sign In</a></li>
+    <li><a href="pages/register.html" class="nav-cta">Join Now</a></li>
+  </ul>
+  <button class="nav-burger" id="navBurger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════ HERO ═══════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="pulse-dot"></span>
+      <span>Live markets active — 2,847 traders online</span>
+    </div>
+    <h1 class="hero-headline">
+      <span class="line-reveal">The Apex of</span>
+      <span class="line-reveal delay-1">Deriv Trading</span>
+    </h1>
+    <p class="hero-sub">We don't just teach trading. <br>We forge market dominators.</p>
+    <div class="hero-actions">
+      <a href="pages/register.html" class="btn-primary">Start Your Journey <span>→</span></a>
+      <a href="#bots" class="btn-ghost">See Our Bots <span>↓</span></a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-num" data-count="12400">0</span>
+        <span class="stat-label">Active Members</span>
+      </div>
+      <div class="stat-sep">|</div>
+      <div class="stat">
+        <span class="stat-num" data-count="94">0</span><span class="stat-pct">%</span>
+        <span class="stat-label">Strategy Win Rate</span>
+      </div>
+      <div class="stat-sep">|</div>
+      <div class="stat">
+        <span class="stat-num" data-prefix="$" data-count="4200000">0</span>
+        <span class="stat-label">Member Profits This Month</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ TICKER ═══════════════════════════ -->
+<div class="ticker-bar">
+  <div class="ticker-inner">
+    <span class="ticker-item green">BOOM 1000 ▲ +2.14%</span>
+    <span class="ticker-sep">·</span>
+    <span class="ticker-item red">CRASH 500 ▼ -0.87%</span>
+    <span class="ticker-sep">·</span>
+    <span class="ticker-item green">VOLATILITY 75 ▲ +1.32%</span>
+    <span class="ticker-sep">·</span>
+    <span class="ticker-item green">EUR/USD ▲ +0.45%</span>
+    <span class="ticker-sep">·</span>
+    <span class="ticker-item red">BTC/USD ▼ -1.23%</span>
+    <span class="ticker-sep">·</span>
+    <span class="ticker-item green">GOLD ▲ +0.78%</span>
+    <span class="ticker-sep">·</span>
+    <span class="ticker-item green">BOOM 500 ▲ +3.01%</span>
+    <span class="ticker-sep">·</span>
+    <span class="ticker-item red">OIL ▼ -0.55%</span>
+    <span class="ticker-sep">·</span>
+    <!-- Repeated for loop -->
+    <span class="ticker-item green">BOOM 1000 ▲ +2.14%</span>
+    <span class="ticker-sep">·</span>
+    <span class="ticker-item red">CRASH 500 ▼ -0.87%</span>
+    <span class="ticker-sep">·</span>
+    <span class="ticker-item green">VOLATILITY 75 ▲ +1.32%</span>
+    <span class="ticker-sep">·</span>
+    <span class="ticker-item green">EUR/USD ▲ +0.45%</span>
+    <span class="ticker-sep">·</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ ABOUT ═══════════════════════════ -->
+<section class="about section" id="about">
+  <div class="container">
+    <div class="about-split">
+      <div class="about-left">
+        <div class="section-tag">WHO WE ARE</div>
+        <h2 class="section-title">Built by traders.<br>For traders.</h2>
+        <p>APEX TRADERS is an elite Deriv trading ecosystem — combining institutional-grade strategies, live mentorship, and battle-tested automated bots into one seamless experience.</p>
+        <p>Every tool we provide has been forged in live market conditions. No theory. No simulation theater. Real trades. Real results.</p>
+        <a href="pages/about.html" class="link-arrow">Our Story <span>→</span></a>
+      </div>
+      <div class="about-right">
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Real-Time Signals</h3>
+            <p>Precision entry/exit signals delivered directly to your dashboard and Telegram.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3>Automated Bots</h3>
+            <p>Pre-configured Deriv bots that execute strategies 24/7 without human error.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Live Mentorship</h3>
+            <p>Direct sessions with veteran traders. Ask, learn, execute — in real time.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Strategy Vault</h3>
+            <p>200+ proven strategies with full backtesting data and risk parameters.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ BOTS ═══════════════════════════ -->
+<section class="bots section" id="bots">
+  <div class="bots-bg-text">BOTS</div>
+  <div class="container">
+    <div class="section-header centered">
+      <div class="section-tag">AUTOMATION</div>
+      <h2 class="section-title">Your 24/7<br>Trading Machine</h2>
+      <p class="section-desc">Deploy pre-built, expert-configured Deriv bots in minutes. No coding. No guesswork. Just results.</p>
+    </div>
+    <div class="bots-showcase">
+      <div class="bot-card" data-bot="boom">
+        <div class="bot-header">
+          <div class="bot-status live">● LIVE</div>
+          <div class="bot-market">BOOM 1000</div>
+        </div>
+        <h3 class="bot-name">Titan Bot</h3>
+        <p class="bot-desc">Masters the Boom 1000 synthetic index with spike detection and precision entry logic.</p>
+        <div class="bot-metrics">
+          <div class="metric"><span class="metric-val">78%</span><span class="metric-key">Win Rate</span></div>
+          <div class="metric"><span class="metric-val">2.4x</span><span class="metric-key">Avg ROI</span></div>
+          <div class="metric"><span class="metric-val">0.8s</span><span class="metric-key">Execution</span></div>
+        </div>
+        <div class="bot-graph">
+          <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+            <polyline points="0,55 20,48 35,50 50,30 65,35 80,20 95,25 110,10 130,15 150,5 170,8 200,3"
+              fill="none" stroke="var(--accent)" stroke-width="2"/>
+            <polyline points="0,55 20,48 35,50 50,30 65,35 80,20 95,25 110,10 130,15 150,5 170,8 200,3 200,60 0,60"
+              fill="url(#botGrad)" stroke="none"/>
+            <defs>
+              <linearGradient id="botGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <a href="pages/bots.html" class="btn-bot">Deploy Bot →</a>
+      </div>
+
+      <div class="bot-card featured" data-bot="crash">
+        <div class="bot-badge">MOST POPULAR</div>
+        <div class="bot-header">
+          <div class="bot-status live">● LIVE</div>
+          <div class="bot-market">CRASH 500</div>
+        </div>
+        <h3 class="bot-name">Phantom Bot</h3>
+        <p class="bot-desc">Hunts crash indices with algorithmic precision, capturing rapid downward movements profitably.</p>
+        <div class="bot-metrics">
+          <div class="metric"><span class="metric-val">82%</span><span class="metric-key">Win Rate</span></div>
+          <div class="metric"><span class="metric-val">3.1x</span><span class="metric-key">Avg ROI</span></div>
+          <div class="metric"><span class="metric-val">0.6s</span><span class="metric-key">Execution</span></div>
+        </div>
+        <div class="bot-graph">
+          <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+            <polyline points="0,50 25,42 40,45 60,28 75,32 90,18 110,22 130,8 155,12 175,4 200,2"
+              fill="none" stroke="#f5c842" stroke-width="2"/>
+            <polyline points="0,50 25,42 40,45 60,28 75,32 90,18 110,22 130,8 155,12 175,4 200,2 200,60 0,60"
+              fill="url(#botGrad2)" stroke="none"/>
+            <defs>
+              <linearGradient id="botGrad2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f5c842" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#f5c842" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <a href="pages/bots.html" class="btn-bot gold">Deploy Bot →</a>
+      </div>
+
+      <div class="bot-card" data-bot="vol">
+        <div class="bot-header">
+          <div class="bot-status live">● LIVE</div>
+          <div class="bot-market">VOLATILITY 75</div>
+        </div>
+        <h3 class="bot-name">Vortex Bot</h3>
+        <p class="bot-desc">Thrives in high-volatility environments, leveraging turbulent market swings for consistent gains.</p>
+        <div class="bot-metrics">
+          <div class="metric"><span class="metric-val">74%</span><span class="metric-key">Win Rate</span></div>
+          <div class="metric"><span class="metric-val">2.8x</span><span class="metric-key">Avg ROI</span></div>
+          <div class="metric"><span class="metric-val">0.9s</span><span class="metric-key">Execution</span></div>
+        </div>
+        <div class="bot-graph">
+          <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+            <polyline points="0,52 15,45 30,52 45,35 60,40 80,22 95,28 115,12 135,18 160,7 180,10 200,4"
+              fill="none" stroke="var(--accent)" stroke-width="2"/>
+            <polyline points="0,52 15,45 30,52 45,35 60,40 80,22 95,28 115,12 135,18 160,7 180,10 200,4 200,60 0,60"
+              fill="url(#botGrad3)" stroke="none"/>
+            <defs>
+              <linearGradient id="botGrad3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <a href="pages/bots.html" class="btn-bot">Deploy Bot →</a>
+      </div>
+    </div>
+    <div class="bots-cta">
+      <a href="pages/bots.html" class="btn-outline">View All 12 Bots →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ HOW IT WORKS ═══════════════════════════ -->
+<section class="how section" id="how">
+  <div class="container">
+    <div class="section-header centered">
+      <div class="section-tag">PROCESS</div>
+      <h2 class="section-title">From Zero to<br>Market Dominator</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>Create Your Account</h3>
+          <p>Sign up and link your Deriv account via OAuth. Verified in under 2 minutes.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>Choose Your Plan</h3>
+          <p>Select a membership tier that fits your goals — from beginner to elite trader.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>Deploy Your Bot</h3>
+          <p>Pick a pre-built bot or customize one. One click to launch it on your Deriv account.</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3>Profit & Scale</h3>
+          <p>Track performance in real time. Scale your stake as your confidence grows.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ PLANS ═══════════════════════════ -->
+<section class="plans section" id="plans">
+  <div class="container">
+    <div class="section-header centered">
+      <div class="section-tag">MEMBERSHIP</div>
+      <h2 class="section-title">Choose Your<br>Arsenal</h2>
+      <p class="section-desc">All plans come with a 7-day risk-free trial. No hidden fees.</p>
+    </div>
+    <div class="plans-toggle">
+      <button class="toggle-btn active" data-period="monthly">Monthly</button>
+      <button class="toggle-btn" data-period="annual">Annual <span class="save-badge">Save 30%</span></button>
+    </div>
+    <div class="plans-grid">
+
+      <div class="plan-card">
+        <div class="plan-tier">RECRUIT</div>
+        <div class="plan-price">
+          <span class="currency">$</span>
+          <span class="amount monthly-price">29</span>
+          <span class="amount annual-price hidden">20</span>
+          <span class="period">/mo</span>
+        </div>
+        <p class="plan-tagline">Perfect for beginners entering the arena.</p>
+        <ul class="plan-features">
+          <li>✓ 3 Pre-built Trading Bots</li>
+          <li>✓ Daily Market Signals</li>
+          <li>✓ Strategy Vault Access (50 strategies)</li>
+          <li>✓ Community Forum Access</li>
+          <li>✓ Weekly Group Mentorship</li>
+          <li class="dim">✗ 1-on-1 Mentorship</li>
+          <li class="dim">✗ Custom Bot Builder</li>
+          <li class="dim">✗ Elite Signal Room</li>
+        </ul>
+        <a href="pages/checkout.html?plan=recruit" class="btn-plan">Get Started</a>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="plan-popular-badge">BEST VALUE</div>
+        <div class="plan-tier">OPERATIVE</div>
+        <div class="plan-price">
+          <span class="currency">$</span>
+          <span class="amount monthly-price">79</span>
+          <span class="amount annual-price hidden">55</span>
+          <span class="period">/mo</span>
+        </div>
+        <p class="plan-tagline">The complete toolkit for serious traders.</p>
+        <ul class="plan-features">
+          <li>✓ All 12 Pre-built Trading Bots</li>
+          <li>✓ Real-Time Signals (24/7)</li>
+          <li>✓ Full Strategy Vault (200+ strategies)</li>
+          <li>✓ Community + VIP Forum</li>
+          <li>✓ 2x Monthly 1-on-1 Mentorship</li>
+          <li>✓ Custom Bot Builder</li>
+          <li>✓ Telegram Signal Group</li>
+          <li class="dim">✗ Elite Signal Room</li>
+        </ul>
+        <a href="pages/checkout.html?plan=operative" class="btn-plan gold">Become Operative</a>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-tier">APEX ELITE</div>
+        <div class="plan-price">
+          <span class="currency">$</span>
+          <span class="amount monthly-price">199</span>
+          <span class="amount annual-price hidden">139</span>
+          <span class="period">/mo</span>
+        </div>
+        <p class="plan-tagline">Unlimited access. Unlimited potential.</p>
+        <ul class="plan-features">
+          <li>✓ Everything in Operative</li>
+          <li>✓ Elite Signal Room (proprietary)</li>
+          <li>✓ Unlimited 1-on-1 Mentorship</li>
+          <li>✓ Early Bot Releases</li>
+          <li>✓ Portfolio Review Sessions</li>
+          <li>✓ Priority Support (24/7)</li>
+          <li>✓ Monthly Performance Report</li>
+          <li>✓ Dedicated Account Manager</li>
+        </ul>
+        <a href="pages/checkout.html?plan=apex" class="btn-plan">Go Apex Elite</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ TESTIMONIALS ═══════════════════════════ -->
+<section class="testimonials section" id="community">
+  <div class="testimonials-bg-text">APEX</div>
+  <div class="container">
+    <div class="section-header centered">
+      <div class="section-tag">COMMUNITY</div>
+      <h2 class="section-title">Battle Reports<br>From the Field</h2>
+    </div>
+    <div class="testimonial-track" id="testimonialTrack">
+      <div class="testimonial-card">
+        <div class="testimonial-quote">"</div>
+        <p>Phantom Bot turned my $500 account into $2,100 in 6 weeks. The strategy logic is unlike anything else on the market.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">JK</div>
+          <div>
+            <strong>James K.</strong>
+            <span>Nairobi, Kenya · Operative Member</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-quote">"</div>
+        <p>The live mentorship sessions are pure gold. I went from losing consistently to a 73% win rate within 3 months of joining.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">AM</div>
+          <div>
+            <strong>Amara M.</strong>
+            <span>Lagos, Nigeria · Apex Elite</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-quote">"</div>
+        <p>What sets APEX apart is the community. 3AM and someone's always there helping debug your bot configuration. Invaluable.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">DT</div>
+          <div>
+            <strong>David T.</strong>
+            <span>Accra, Ghana · Recruit → Operative</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-quote">"</div>
+        <p>Vortex Bot running on Volatility 75 has been my second salary. Consistent. Reliable. The team updates it regularly too.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">SB</div>
+          <div>
+            <strong>Sarah B.</strong>
+            <span>Cape Town, SA · Operative Member</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-dots" id="testimonialDots">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ FAQ ═══════════════════════════ -->
+<section class="faq section" id="faq">
+  <div class="container">
+    <div class="faq-split">
+      <div class="faq-left">
+        <div class="section-tag">FAQ</div>
+        <h2 class="section-title">Questions<br>Answered.</h2>
+        <p>Still unsure? Reach out to us on Telegram or via our live chat.</p>
+        <a href="pages/contact.html" class="link-arrow">Contact Us <span>→</span></a>
+      </div>
+      <div class="faq-right">
+        <div class="faq-item">
+          <button class="faq-q">Do I need a Deriv account to join? <span class="faq-icon">+</span></button>
+          <div class="faq-a">Yes. All bots and strategies are built for the Deriv platform. Registration is free and takes under 5 minutes at deriv.com. We walk you through the setup during onboarding.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Are the bots fully automated? <span class="faq-icon">+</span></button>
+          <div class="faq-a">Yes. Once deployed with your Deriv API token, the bots run autonomously 24/7. You set the stake and risk limits; the bot handles everything else.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">What payment methods are accepted? <span class="faq-icon">+</span></button>
+          <div class="faq-a">We accept all major credit/debit cards (Visa, Mastercard), M-Pesa, and cryptocurrency (USDT, BTC). Payments are processed securely via Stripe and our crypto gateway.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Can I cancel my subscription anytime? <span class="faq-icon">+</span></button>
+          <div class="faq-a">Absolutely. Cancel at any time from your dashboard with no penalties. Your access continues until the end of the billing period.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Is there a free trial? <span class="faq-icon">+</span></button>
+          <div class="faq-a">Yes — every new member gets a 7-day full-access trial, no credit card required. You'll have access to all features of the Operative plan during the trial.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ CTA ═══════════════════════════ -->
+<section class="final-cta section">
+  <div class="final-cta-bg"></div>
+  <div class="container">
+    <div class="final-cta-content">
+      <h2>Ready to<br>Trade at the Apex?</h2>
+      <p>Join 12,400+ traders who chose to dominate rather than speculate.</p>
+      <a href="pages/register.html" class="btn-primary large">Begin Your Mission <span>→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="nav-logo">
+          <span class="logo-mark">▲</span>
+          <span class="logo-text">APEX<em>TRADERS</em></span>
+        </div>
+        <p>Elite Deriv trading community. Strategies. Bots. Mentorship.</p>
+        <div class="social-links">
+          <a href="#" aria-label="Telegram">✈</a>
+          <a href="#" aria-label="Twitter">𝕏</a>
+          <a href="#" aria-label="Instagram">◈</a>
+          <a href="#" aria-label="YouTube">▶</a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="pages/bots.html">Trading Bots</a></li>
+            <li><a href="#plans">Membership Plans</a></li>
+            <li><a href="pages/dashboard.html">Dashboard</a></li>
+            <li><a href="#community">Community</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Learn</h4>
+          <ul>
+            <li><a href="pages/strategies.html">Strategy Vault</a></li>
+            <li><a href="pages/mentorship.html">Mentorship</a></li>
+            <li><a href="pages/blog.html">Blog</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="pages/about.html">About Us</a></li>
+            <li><a href="pages/contact.html">Contact</a></li>
+            <li><a href="pages/terms.html">Terms of Service</a></li>
+            <li><a href="pages/privacy.html">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 APEX TRADERS. All rights reserved.</p>
+      <p class="disclaimer">Trading involves risk. Past performance is not indicative of future results. Trade responsibly.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
